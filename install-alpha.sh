@@ -79,6 +79,8 @@ echo "$METABOX_CONFIG Created.."
 echo "Setting Apache2 Config"
 rm -rf /etc/apache2/apache2.conf;
 mv "$METABOX_PANEL"/apache2/apache2.conf /etc/apache2/;
+rm -rf /etc/apache2/ports.conf;
+mv "$METABOX_PANEL"/apache2/ports.conf /etc/apache2/;
 rm -rf /etc/apache2/sites-available/000-default.conf;
 mv "$METABOX_PANEL"/apache2/000-default.conf /etc/apache2/sites-available/;
 echo "enable mod_rewrite"
@@ -115,7 +117,7 @@ mkdir -p "$METABOX_TRAKTARR"/tempBuild;
 echo "Pulling Docker Templates for rClone, this is only for testing.. because cbf"
 /usr/bin/docker pull metaboxcloud/rclone-mega.docker
 /usr/bin/docker pull metaboxcloud/rclone-gdrive.docker
-docker run -p 9999:8080 -v $(METABOX_PANEL):/var/www/html trafex/alpine-nginx-php7
+docker run -p "9999:80" -v /mb/panel:/app mattrayner/lamp:latest-1804
 
 
 
