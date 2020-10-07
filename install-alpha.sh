@@ -31,8 +31,8 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
 sudo apt-key fingerprint 0EBFCD88;
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 echo "..... Google Cloud SDK ......"
-echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list;
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -;
+#echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list;
+#curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -;
 echo "Updating OS (apt-get update)"
 apt-get -qy update > /dev/null;
 echo "Updating OS (apt-get upgrade)"
@@ -54,7 +54,7 @@ echo "Install Apache and stuff (WILL BE REPLACED OUT FOR NGINX IN FUTURE AFTER D
 sudo apt-get -qy install apache2 apache2-doc libexpat1 > /dev/null;
 sudo apt-get -qy install php php-common libapache2-mod-php php-curl php-dev php-gd php-gettext php-imagick php-intl php-mbstring php-mysql php-pear php-pspell php-recode php-xml php-zip > /dev/null;
 echo "Install Google Cloud SDK"
-sudo apt-get -qy install google-cloud-sdk;
+#sudo apt-get -qy install google-cloud-sdk;
 echo "Create metaBox Directories"
 mkdir -p "$METABOX_DIR"; 
 echo "$METABOX_DIR Created.."
