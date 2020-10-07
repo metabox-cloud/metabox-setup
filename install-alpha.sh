@@ -10,6 +10,7 @@ METABOX_MOUNTS="$METABOX_DIR"/mounts
 METABOX_CONFIG="$METABOX_DIR"/config
 METABOX_TRAKTARR="$METABOX_DIR"/traktarr
 METABOX_IF=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
+IP_ADDR=$(curl -s https://api.ipify.org)
 
 	os_version=$(grep 'VERSION_ID' /etc/os-release | cut -d '"' -f 2 | tr -d '.')
 	group_name="nogroup"
@@ -132,11 +133,11 @@ echo "                                          ░                   "
 echo ""
 echo "=============================================================="
 echo ""
-ip=$(curl -s https://api.ipify.org)
+
 echo ""
 echo "Access Web-Installer: http://potato-jamba.metabox.me:9999"
 echo "OR (Direct IP Access)"
-echo "Access Web-Installer: http://$ip:9999"
+echo "Access Web-Installer: http://$IP_ADDR:9999"
 echo "One-Time Password for Installer: $INSTALLER"
 echo ""
 echo "You can now use our web installer to configure your cloud drives, and applications"
