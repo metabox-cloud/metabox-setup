@@ -4,7 +4,9 @@ OSARCH=$(uname -m)
 METABOX_DIR=/mb
 METABOX_LOGS="$METABOX_DIR"/logs
 METABOX_PANEL="$METABOX_DIR"/panel
+METABOX_CACHE="$METABOX_DIR"/cache
 METABOX_BUILD="$METABOX_DIR"/build
+METABOX_MOUNTS="$METABOX_DIR"/mounts
 METABOX_CONFIG="$METABOX_DIR"/config
 METABOX_TRAKTARR="$METABOX_DIR"/traktarr
 METABOX_IF=$(ip route get 8.8.8.8 | awk -- '{printf $5}')
@@ -56,6 +58,10 @@ sudo apt-get -qy install php php-common libapache2-mod-php php-curl php-dev php-
 echo "Install Google Cloud SDK"
 #sudo apt-get -qy install google-cloud-sdk;
 echo "Create metaBox Directories"
+mkdir -p "$METABOX_CACHE"; 
+echo "$METABOX_CACHE Created.."
+mkdir -p "$METABOX_MOUNTS"; 
+echo "$METABOX_MOUNTS Created.."
 mkdir -p "$METABOX_DIR"; 
 echo "$METABOX_DIR Created.."
 mkdir -p "$METABOX_LOGS";
@@ -63,7 +69,7 @@ echo "$METABOX_LOGS Created.."
 mkdir -p "$METABOX_PANEL";
 echo "$METABOX_PANEL Created.."
 echo "Pulling metaBox Panel from Repo"
-git clone --branch dev https://github.com/metabox-cloud/metabox-panel.git "$METABOX_PANEL";
+git clone https://github.com/metabox-cloud/metabox-panel.git "$METABOX_PANEL";
 mkdir -p "$METABOX_TRAKTARR";
 echo "$METABOX_TRAKTARR Created.."
 mkdir -p "$METABOX_TRAKTARR"/config;
@@ -99,7 +105,7 @@ sudo ln -s "$METABOX_TRAKTARR"/app/traktarr.py /usr/local/bin/traktarr;
 echo "Traktarr Installed - Edit Config/List's in the WebUI"
 
 echo "Pull Container Setups :)"
-git clone --branch dev https://www.github.com/metabox-cloud/metabox-containers.git "$METABOX_CONFIG";
+git clone https://www.github.com/metabox-cloud/metabox-containers.git "$METABOX_CONFIG";
 rm -rf "$METABOX_CONFIG"/LICENSE;
 rm -rf "$METABOX_CONFIG"/README.md;
 echo "Pulled :) "
