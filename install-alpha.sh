@@ -117,7 +117,7 @@ mkdir -p "$METABOX_TRAKTARR"/tempBuild;
 echo "Pulling Docker Templates for rClone, this is only for testing.. because cbf"
 /usr/bin/docker pull metaboxcloud/rclone-mega.docker
 /usr/bin/docker pull metaboxcloud/rclone-gdrive.docker
-docker run -p "9999:80" -v /mb/panel:/app mattrayner/lamp:latest-1804
+docker create --name PanelTest -p "9999:80" -v /mb/panel:/app mattrayner/lamp:latest-1804
 
 
 
