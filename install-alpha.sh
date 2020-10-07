@@ -63,7 +63,7 @@ echo "$METABOX_LOGS Created.."
 mkdir -p "$METABOX_PANEL";
 echo "$METABOX_PANEL Created.."
 echo "Pulling metaBox Panel from Repo"
-git clone --branch dev https://www.github.com/metabox-cloud/metaBox-Panel.git "$METABOX_PANEL";
+git clone --branch dev https://www.github.com/metabox-cloud/metabox-panel.git "$METABOX_PANEL";
 mkdir -p "$METABOX_TRAKTARR";
 echo "$METABOX_TRAKTARR Created.."
 mkdir -p "$METABOX_TRAKTARR"/config;
