@@ -32,9 +32,6 @@ echo "...... Docker Repo ....."
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
 sudo apt-key fingerprint 0EBFCD88;
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-echo "..... Google Cloud SDK ......"
-#echo "deb http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list;
-#curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -;
 echo "Updating OS (apt-get update)"
 apt-get -qy update > /dev/null;
 echo "Updating OS (apt-get upgrade)"
@@ -52,11 +49,7 @@ sudo groupadd docker;
 sudo usermod -aG docker $USER;
 sudo usermod -aG www-data $USER;
 sudo systemctl enable docker;
-echo "Install Apache and stuff (WILL BE REPLACED OUT FOR NGINX IN FUTURE AFTER DEV COMPLETE"
-sudo apt-get -qy install apache2 apache2-doc libexpat1 > /dev/null;
-sudo apt-get -qy install php php-common libapache2-mod-php php-curl php-dev php-gd php-gettext php-imagick php-intl php-mbstring php-mysql php-pear php-pspell php-recode php-xml php-zip > /dev/null;
-echo "Install Google Cloud SDK"
-#sudo apt-get -qy install google-cloud-sdk;
+
 echo "Create metaBox Directories"
 mkdir -p "$METABOX_CACHE"; 
 echo "$METABOX_CACHE Created.."
@@ -82,21 +75,6 @@ chown -R www-data:www-data /mb/traktarr/list;
 echo "Setting Owner of $METABOX_TRAKTARR/list"
 mkdir -p "$METABOX_CONFIG";
 echo "$METABOX_CONFIG Created.."
-echo "Setting Apache2 Config"
-rm -rf /etc/apache2/apache2.conf;
-mv "$METABOX_PANEL"/apache2/apache2.conf /etc/apache2/;
-rm -rf /etc/apache2/ports.conf;
-mv "$METABOX_PANEL"/apache2/ports.conf /etc/apache2/;
-rm -rf /etc/apache2/sites-available/000-default.conf;
-mv "$METABOX_PANEL"/apache2/000-default.conf /etc/apache2/sites-available/;
-echo "enable mod_rewrite"
-a2enmod rewrite;
-echo "Restarting Apache2"
-service apache2 restart;
-
-echo "Adding Sudoer for Docker Access (Not uber secure.. but we shall work something out later)"
-echo "www-data   ALL = NOPASSWD: ALL" >> /etc/sudoers;
-
 echo "Install Traktarr"
 sudo git clone https://github.com/l3uddz/traktarr "$METABOX_TRAKTARR"/app;
 cd "$METABOX_TRAKTARR"/app;
@@ -108,24 +86,22 @@ echo "Pull Container Setups :)"
 git clone https://www.github.com/metabox-cloud/metabox-containers.git "$METABOX_CONFIG";
 rm -rf "$METABOX_CONFIG"/LICENSE;
 rm -rf "$METABOX_CONFIG"/README.md;
-echo "Pulled :) "
 
 echo "Creating Default Docker Containers (Watchtower, Portainer, rClone)"
-
-/usr/bin/docker create --name Watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower;
+/usr/bin/docker create --name metaBox_Panel  --restart=always -v "$METABOX_DIR":/mb -v /var/run/docker.sock:/var/run/docker.sock -p 9999:9999 metaboxcloud/metabox.panel.docker:latest
+echo "metaBox Panel Created"
+/usr/bin/docker create --name Watchtower --restart=always -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower;
 echo "Watchtower Created"
-/usr/bin/docker create --name Portainer -p 8000:8000 -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v "$METABOX_CONFIG"/portainer:/data portainer/portainer-ce
+/usr/bin/docker create --name Portainer -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v "$METABOX_CONFIG"/portainer:/data portainer/portainer-ce
 echo "Portainer Created"
 echo "Starting Containers"
 /usr/bin/docker start $(docker ps -a -q)
-echo "Building base Dockerized RClone Image (metabox-rclone:1.0)"
-mkdir -p "$METABOX_TRAKTARR"/tempBuild;
+
+
 echo "Pulling Docker Templates for rClone, this is only for testing.. because cbf"
 /usr/bin/docker pull metaboxcloud/rclone-mega.docker
 /usr/bin/docker pull metaboxcloud/rclone-gdrive.docker
-docker create --name PanelTest -p "9999:80" -v /mb/panel:/app mattrayner/lamp:latest-1804
-
-
+INSTALLER=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 echo "METABOX_WEBNAME=metaBox" > "$METABOX_CONFIG"/config.dat;
 echo "METABOX_DIR=$METABOX_DIR" >> "$METABOX_CONFIG"/config.dat;
@@ -139,19 +115,35 @@ echo "METABOX_CONFIG=$METABOX_DIR/config" >> "$METABOX_CONFIG"/config.dat;
 echo "METABOX_TRAKTARR=$METABOX_DIR/traktarr" >> "$METABOX_CONFIG"/config.dat;
 echo "METABOX_IF=$METABOX_IF" >> "$METABOX_CONFIG"/config.dat;
 echo "METABOX_LANGUAGE=en" >> "$METABOX_CONFIG"/config.dat;
-echo "METABOX_IMAGE=metaboxcloud/rclone-mega" >> "$METABOX_CONFIG"/config.dat;
-clear;
-	echo
-	echo "Your Username to access metaBox..."
-	read -p "Username: " mbun
-	echo "METABOX_USERNAME=$mbun" >> "$METABOX_CONFIG"/config.dat;
-clear;
-	echo
-	echo "Your Password to access metaBox.."
-	read -p "New Password: " mbpw
-UPASS=$(echo "$mbpw" | md5sum | awk '{print $1}')
-    echo "METABOX_PASSWORD=$UPASS" >> "$METABOX_CONFIG"/config.dat;
-clear;
+echo "METABOX_INSTALLER=$INSTALLER" >> "$METABOX_CONFIG"/config.dat;
 
-echo "Base install Complete..."
-echo "Access VIA port 9999"
+
+clear
+echo " ███▄ ▄███▓▓█████▄▄▄█████▓ ▄▄▄       ▄▄▄▄    ▒█████  ▒██   ██▒"
+echo "▓██▒▀█▀ ██▒▓█   ▀▓  ██▒ ▓▒▒████▄    ▓█████▄ ▒██▒  ██▒▒▒ █ █ ▒░"
+echo "▓██    ▓██░▒███  ▒ ▓██░ ▒░▒██  ▀█▄  ▒██▒ ▄██▒██░  ██▒░░  █   ░"
+echo "▒██    ▒██ ▒▓█  ▄░ ▓██▓ ░ ░██▄▄▄▄██ ▒██░█▀  ▒██   ██░ ░ █ █ ▒ "
+echo "▒██▒   ░██▒░▒████▒ ▒██▒ ░  ▓█   ▓██▒░▓█  ▀█▓░ ████▓▒░▒██▒ ▒██▒"
+echo "░ ▒░   ░  ░░░ ▒░ ░ ▒ ░░    ▒▒   ▓▒█░░▒▓███▀▒░ ▒░▒░▒░ ▒▒ ░ ░▓ ░"
+echo "░  ░      ░ ░ ░  ░   ░      ▒   ▒▒ ░▒░▒   ░   ░ ▒ ▒░ ░░   ░▒ ░"
+echo "░      ░      ░    ░        ░   ▒    ░    ░ ░ ░ ░ ▒   ░    ░  "
+echo "       ░      ░  ░              ░  ░ ░          ░ ░   ░    ░  "
+echo "                                          ░                   "
+echo ""
+echo "=============================================================="
+echo ""
+IpAddress=$(wget http://checkip.dyndns.org/ -qO - | grep -Eo '\<[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}\>')
+echo ""
+echo "Access Web-Installer: $ipAddress:9999"
+echo "One-Time Password for Installer: $INSTALLER"
+echo ""
+echo "You can now use our web installer to configure your cloud drives, and applications"
+echo "Please note; that metaBox is currently in ALPHA, and is under heavy development,"
+echo "Please report any bugs"
+echo ""
+echo "Also, feel free to support development by donating at https://www.paypal.me/fusedit"
+echo ""
+echo "Enjoy!"
+echo "=============================================================="
+echo ""
+
