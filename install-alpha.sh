@@ -132,11 +132,11 @@ echo "                                          ░                   "
 echo ""
 echo "=============================================================="
 echo ""
-IpAddress=$(wget http://checkip.dyndns.org/ -qO - | grep -Eo '\<[[:digit:]]{1,3}(\.[[:digit:]]{1,3}){3}\>')
+ip=$(curl -s https://api.ipify.org)
 echo ""
 echo "Access Web-Installer: http://potato-jamba.metabox.me:9999"
 echo "OR (Direct IP Access)"
-echo "Access Web-Installer: http://$ipAddress:9999"
+echo "Access Web-Installer: http://$ip:9999"
 echo "One-Time Password for Installer: $INSTALLER"
 echo ""
 echo "You can now use our web installer to configure your cloud drives, and applications"
