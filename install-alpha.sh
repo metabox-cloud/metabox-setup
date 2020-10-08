@@ -28,6 +28,8 @@ if [[ "$EUID" -ne 0 ]]; then
 	exit
 fi
 clear;
+read -r -p "Will you be using Google Drive (Shared Drives included) [Y/n]" response
+ response=${response,,}
 echo "Adding Repos"
 echo "...... Docker Repo ....."
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
@@ -91,6 +93,10 @@ rm -rf "$METABOX_CONFIG"/README.md;
 echo "Creating Default Docker Containers (Watchtower, Portainer, rClone)"
 /usr/bin/docker create --name metaBox_Panel  --restart=always -v "$METABOX_DIR":/mb -v /var/run/docker.sock:/var/run/docker.sock -p 9999:9999 metaboxcloud/metabox.panel.docker:latest
 echo "metaBox Panel Created"
+if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
+/usr/bin/docker create --name metaBox_gSDK  --restart=always -v "$METABOX_CONFIG"/google.sdk:/root/.config metaboxcloud/alpine.gsdk.docker:latest
+echo "Created Google SDK - Alpine (by google)"
+ fi
 /usr/bin/docker create --name Watchtower --restart=always -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower;
 echo "Watchtower Created"
 /usr/bin/docker create --name Portainer -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v "$METABOX_CONFIG"/portainer:/data portainer/portainer-ce
@@ -100,9 +106,11 @@ echo "Starting Containers"
 
 
 echo "Pulling Docker Templates for rClone, this is only for testing.. because cbf"
-/usr/bin/docker pull metaboxcloud/rclone-mega.docker
-/usr/bin/docker pull metaboxcloud/rclone-gdrive.docker
+/usr/bin/docker pull metaboxcloud/rclone-mega.docker:latest
+/usr/bin/docker pull metaboxcloud/rclone-gdrive.docker:latest
 INSTALLER=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+
+/usr/bin/docker exec -it metaBox_gSDK gcloud auth login
 
 echo "METABOX_WEBNAME=metaBox" > "$METABOX_CONFIG"/config.dat;
 echo "METABOX_DIR=$METABOX_DIR" >> "$METABOX_CONFIG"/config.dat;
